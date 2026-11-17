@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C盘整理侠 · 本地磁盘分类清理工具</title>
+<style>
+:root{--p:#5b6ee8;--p2:#7c8ff0;--bg:#f4f6fb;--card:#fff;--tx:#22263a;--sub:#6b7390;--line:#e5e9f4;--red:#e5484d;--green:#2fa96e;--amber:#e8a13c;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px;}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+header h1{font-size:22px;}
+.badge{font-size:12px;background:var(--p);color:#fff;border-radius:99px;padding:3px 10px;}
+.notice{background:#fff8e6;border:1px solid #f2dfb3;color:#8a6d2a;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.7;margin-bottom:16px;}
+.notice b{color:#6d5416;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;}
+.card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;background:var(--p);color:#fff;transition:.15s;}
+.btn:hover{background:var(--p2);}
+.btn.big{font-size:17px;padding:15px 34px;}
+.btn.ghost{background:#eef1fb;color:var(--p);}
+.btn.gray{background:#e8ebf5;color:#556;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.step{display:flex;gap:14px;margin-bottom:10px;font-size:14px;color:var(--sub);align-items:flex-start;}
+.step b{color:var(--tx);}
+.stepnum{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.progress-wrap{display:none;margin-top:14px;}
+.pbar{height:10px;background:#e8ebf5;border-radius:99px;overflow:hidden;}
+.pbar>div{height:100%;background:linear-gradient(90deg,var(--p),#8f7cf0);width:0;transition:.2s;}
+.ptext{font-size:13px;color:var(--sub);margin-top:6px;word-break:break-all;}
+#stats{display:none;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.stat{background:#f7f9ff;border:1px solid var(--line);border-radius:10px;padding:12px;}
+.stat .n{font-size:20px;font-weight:700;}
+.stat .l{font-size:12px;color:var(--sub);margin-top:2px;}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 16px;font-size:13px;cursor:pointer;color:var(--sub);}
+.tab.on{background:var(--p);color:#fff;border-color:var(--p);}
+.tab .cnt{opacity:.7;font-size:11px;margin-left:4px;}
+input[type=text]{border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:14px;width:220px;outline:none;}
+input[type=text]:focus{border-color:var(--p);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{position:sticky;top:0;background:#f7f9ff;text-align:left;padding:9px 10px;font-size:12.5px;color:var(--sub);border-bottom:1px solid var(--line);white-space:nowrap;z-index:1;}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f9;vertical-align:middle;}
+tr:hover td{background:#f8faff;}
+.size{font-weight:600;white-space:nowrap;}
+.bar-cell{width:90px;}
+.bar{height:6px;border-radius:99px;background:#eceef6;overflow:hidden;}
+.bar>div{height:100%;background:var(--p);}
+.path{color:var(--sub);font-size:12px;word-break:break-all;max-width:420px;}
+.tag{display:inline-block;border-radius:5px;padding:2px 8px;font-size:11.5px;white-space:nowrap;}
+.chk{width:16px;height:16px;cursor:pointer;}
+.del-bar{display:none;position:sticky;bottom:12px;background:#2a2f45;color:#fff;border-radius:12px;padding:12px 18px;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:5;flex-wrap:wrap;}
+.del-bar .btn{padding:9px 18px;font-size:14px;}
+.del-bar .btn.danger{background:var(--red);}
+.hint{font-size:12.5px;color:var(--sub);line-height:1.8;margin-top:10px;}
+.danger-note{color:var(--red);font-weight:600;}
+.safe{color:var(--green);}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
+.empty{text-align:center;padding:50px 20px;color:var(--sub);}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#2a2f45;color:#fff;padding:10px 22px;border-radius:10px;font-size:14px;z-index:99;display:none;max-width:90vw;}
+.cat-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:10px;}
+.sugg{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f9;font-size:14px;align-items:center;}
+.sugg:last-child{border-bottom:none;}
+.sugg .sz{font-weight:700;white-space:nowrap;}
+@media(max-width:640px){.path{max-width:150px;}input[type=text]{width:100%;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🟣 C盘整理侠</h1>
+  <span class="badge">本地运行 · 文件不上传</span>
+  <span class="badge" id="verBadge" style="background:#3b9bd1;"></span>
+</header>
+
+<div class="notice">
+⚠️ <b>使用前必读：</b><br>
+① 请用 <b>电脑上的 Edge 或 Chrome 浏览器</b>打开本页（手机/微信打不开）。<br>
+② 建议第一次先扫 <b>「下载」文件夹</b> 试手，熟悉后再扫整个 C盘（扫C盘需几分钟，会弹权限确认，请点「上传文件」对应的允许）。<br>
+③ 删除前请确认文件不需要——删除不进回收站、无法恢复。Windows、Program Files 等<b>系统目录的内容不要删</b>（页面会自动标红禁选）。
+</div>
+
+<div class="card">
+  <h2>🚀 开始</h2>
+  <div class="step"><div class="stepnum">1</div><div>点击下面按钮，在弹出窗口中选择要扫描的文件夹（如 <b>此电脑 → 下载</b>，或 <b>本地磁盘 C:</b>）</div></div>
+  <div class="step"><div class="stepnum">2</div><div>等待扫描完成，查看分类统计、清理建议与大文件排行</div></div>
+  <div class="step"><div class="stepnum">3</div><div>勾选不需要的文件（优先删「安装包」——软件装完就没用了），点击删除</div></div>
+  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="btn big" id="pickBtn">📁 选择文件夹并扫描</button>
+    <button class="btn ghost big" id="stopBtn" style="display:none;">■ 停止</button>
+  </div>
+  <div class="progress-wrap" id="progWrap">
+    <div class="pbar"><div id="pbar"></div></div>
+    <div class="ptext" id="ptext">准备中…</div>
+  </div>
+</div>
+
+<div class="card" id="stats" style="display:none;">
+  <h2>📊 分类总览 <span style="font-size:12px;color:var(--sub);font-weight:400;" id="totalInfo"></span></h2>
+  <div class="grid" id="statGrid"></div>
+  <div class="cat-legend" id="legend"></div>
+</div>
+
+<div class="card" id="suggCard" style="display:none;">
+  <h2>💡 清理建议</h2>
+  <div id="suggList"></div>
+  <div class="hint">🟢 安装包、临时文件一般可放心删；🟡 图片/视频/文档是你的个人文件，删前确认或迁移到 D 盘；🔴 系统目录内容不要动。</div>
+</div>
+
+<div class="card" id="filesCard" style="display:none;">
+  <h2>🗂 文件明细</h2>
+  <div class="toolbar">
+    <div class="tabs" id="tabs"></div>
+    <input type="text" id="search" placeholder="🔍 搜索文件名…">
+  </div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th style="width:30px;"></th><th>文件名</th><th>位置</th><th>分类</th><th class="bar-cell">大小占比</th><th>大小</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="del-bar" id="delBar">
+    <span>已选 <b id="selCnt">0</b> 项，共 <b id="selSize">0 B</b></span>
+    <button class="btn danger" id="delBtn">🗑 删除所选</button>
+    <button class="btn gray" id="selAllBtn">全选本页</button>
+    <button class="btn gray" id="clearSelBtn">取消选择</button>
+  </div>
+  <div class="hint" id="moreHint"></div>
+</div>
+
+<div class="card">
+  <h2>📖 怎么分辨？（分类说明）</h2>
+  <div class="hint" style="margin-top:0;font-size:13px;">
+    <b>安装包</b>（.exe / .msi / .apk）→ 软件装完就没用了，<span class="safe">放心删</span>；下次要装去官网重新下载<br>
+    <b>程序/软件本体</b> → 已装好的软件（多在 Program Files），删了软件就没了，<span class="danger-note">别在这里删</span>；卸载软件请去「设置 → 应用」<br>
+    <b>图片 / 视频 / 文档</b> → 你的个人文件，删前想想要不要备份，或迁移到 D 盘<br>
+    <b>压缩包</b>（.zip / .rar / .7z）→ 解压过的一般可以删<br>
+    <b>临时文件</b>（Temp / Cache 缓存）→ 可以删，软件会自动重新生成<br>
+    <b>系统文件</b>（Windows 文件夹里）→ <span class="danger-note">绝对不要动</span>
+  </div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+window.__VER='v1.0';
+document.getElementById('verBadge').textContent=window.__VER;
+
+const CATS = {
+  installer:{name:'安装包',color:'#e5484d',exts:['exe','msi','msix','apk','dmg','appx','msixbundle','iso'],safe:1},
+  program:{name:'程序/软件',color:'#5b6ee8',exts:['dll','sys','bat','cmd','ps1','jar','pyc','lnk','scr'],safe:0},
+  image:{name:'图片',color:'#2fa96e',exts:['jpg','jpeg','png','gif','webp','bmp','heic','tif','tiff','svg','ico','raw','cr2','nef','psd','ai'],safe:0},
+  video:{name:'视频',color:'#c25ce8',exts:['mp4','mkv','avi','mov','wmv','flv','webm','m4v','ts','rmvb','3gp'],safe:0},
+  audio:{name:'音频',color:'#e8734c',exts:['mp3','wav','flac','aac','ogg','m4a','wma','ape','mid'],safe:0},
+  archive:{name:'压缩包',color:'#e8a13c',exts:['zip','rar','7z','tar','gz','bz2','cab','zst'],safe:0},
+  doc:{name:'文档',color:'#3b9bd1',exts:['pdf','doc','docx','xls','xlsx','ppt','pptx','txt','md','csv','epub','mobi','wps','et','dps','rtf'],safe:0},
+  font:{name:'字体',color:'#8f8f9f',exts:['ttf','otf','woff','woff2','fon'],safe:0},
+  db:{name:'数据文件',color:'#a0a8b8',exts:['db','sqlite','mdb','dat','bak','old','tmp'],safe:0},
+  other:{name:'其他',color:'#c3c9d9',exts:[],safe:0}
+};
+const SYS_DIRS = ['windows','program files','program files (x86)','programdata','$recycle.bin','system volume information','perflogs','recovery','drivers','intel','amd','nvidia'];
+const TEMP_HINT = /(^|\\)(temp|cache|缓存|tmp)(\\|$)/i;
+
+let files=[], aborted=false, curTab='all', curHandle=null, lastByCat=null;
+const selected=new Set();
+
+const $=id=>document.getElementById(id);
+const fmt=n=>{if(n>=1073741824)return(n/1073741824).toFixed(2)+' GB';if(n>=1048576)return(n/1048576).toFixed(1)+' MB';if(n>=1024)return(n/1024).toFixed(0)+' KB';return n+' B';};
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+
+function catOf(name){
+  const ext=(name.includes('.')?name.split('.').pop():'').toLowerCase();
+  for(const k in CATS){if(CATS[k].exts.includes(ext))return k;}
+  return 'other';
+}
+const isSysPath=p=>SYS_DIRS.includes((p.split('\\')[0]||'').toLowerCase());
+
+$('pickBtn').onclick=async()=>{
+  try{
+    const h=await window.showDirectoryPicker({mode:'readwrite'});
+    curHandle=h; aborted=false; files=[]; selected.clear();
+    $('pickBtn').disabled=true; $('stopBtn').style.display='';
+    $('progWrap').style.display='block';
+    $('stats').style.display='none';$('suggCard').style.display='none';$('filesCard').style.display='none';
+    const t0=Date.now();
+    await scan(h,'');
+    if(aborted&&files.length)toast('已停止扫描（已扫到的部分照常显示）');
+    else if(aborted)return;
+    render();
+    toast('扫描完成：'+files.length.toLocaleString()+' 个文件，用时 '+((Date.now()-t0)/1000).toFixed(1)+' 秒');
+  }catch(e){
+    if(e.name==='AbortError')toast('已取消选择');
+    else if(e.name==='SecurityError')toast('权限不足：请换 Edge/Chrome，或选择有权限的文件夹');
+    else toast('出错了：'+e.message);
+  }finally{
+    $('pickBtn').disabled=false; $('stopBtn').style.display='none';
+  }
+};
+$('stopBtn').onclick=()=>{aborted=true;};
+
+async function scan(dir,prefix){
+  if(aborted)return;
+  let entries;
+  try{entries=dir.entries();}catch(e){return;}
+  const tasks=[];
+  for await(const [name,handle] of entries){
+    if(aborted)return;
+    const path=prefix?prefix+'\\'+name:name;
+    if(handle.kind==='file'){
+      tasks.push((async()=>{
+        let size=0;
+        try{size=(await handle.getFile()).size;}catch(e){}
+        files.push({name,path,size,cat:catOf(name)});
+      })());
+      if(tasks.length>=300){updateProg(path);await Promise.all(tasks);tasks.length=0;}
+    }else{
+      updateProg(path+'\\…');
+      await scan(handle,path);
+    }
+  }
+  if(tasks.length)await Promise.all(tasks);
+}
+let lastProg=0;
+function updateProg(txt){
+  const now=Date.now();
+  if(now-lastProg<300)return; lastProg=now;
+  $('ptext').textContent='已扫描 '+files.length.toLocaleString()+' 个文件… 当前：'+txt;
+  $('pbar').style.width=Math.min(96,(files.length%94)+3)+'%';
+}
+
+function render(){
+  if(!files.length){toast('没有扫到文件（可能没有权限或已停止）');return;}
+  $('pbar').style.width='100%';$('ptext').textContent='扫描完成！共 '+files.length.toLocaleString()+' 个文件';
+  setTimeout(()=>{$('progWrap').style.display='none';},1000);
+  files.sort((a,b)=>b.size-a.size);
+  const total=files.reduce((s,f)=>s+f.size,0);
+  $('totalInfo').textContent='共 '+files.length.toLocaleString()+' 个文件，总计 '+fmt(total);
+  const byCat={};
+  files.forEach(f=>{(byCat[f.cat]=byCat[f.cat]||{n:0,s:0});byCat[f.cat].n++;byCat[f.cat].s+=f.size;});
+  lastByCat=byCat;
+  $('statGrid').innerHTML=Object.entries(byCat).sort((a,b)=>b[1].s-a[1].s).map(([k,v])=>
+    `<div class="stat"><div class="n" style="color:${CATS[k].color}">${fmt(v.s)}</div><div class="l">${CATS[k].name} · ${v.n.toLocaleString()} 个</div></div>`).join('');
+  $('legend').innerHTML=Object.entries(byCat).map(([k])=>`<span><span class="cat-dot" style="background:${CATS[k].color}"></span>${CATS[k].name}</span>`).join('');
+  $('stats').style.display='';
+  renderSugg();
+  curTab='all';
+  renderTabs();
+  renderList();
+  $('filesCard').style.display='';
+}
+
+function renderSugg(){
+  const sum=a=>a.reduce((s,f)=>s+f.size,0);
+  const inst=files.filter(f=>f.cat==='installer');
+  const temp=files.filter(f=>TEMP_HINT.test(f.path)&&f.size>1048576);
+  const archives=files.filter(f=>f.cat==='archive');
+  const vids=files.filter(f=>f.cat==='video');
+  const sys=files.filter(f=>isSysPath(f.path));
+  let html='';
+  const row=(icon,title,desc,size,color,show)=>{if(!show)return;
+    html+=`<div class="sugg"><div><b>${icon} ${title}</b> — ${desc}</div><div class="sz" style="color:${color}">${fmt(size)}</div></div>`;};
+  row('📦','安装包','软件装完就没用了，删了不影响已装的软件',sum(inst),CATS.installer.color,inst.length);
+  row('🧹','临时/缓存文件','软件垃圾，可安全清理',sum(temp),CATS.other.color,temp.length);
+  row('🗜️','压缩包','解压过的一般可以删',sum(archives),CATS.archive.color,archives.length);
+  row('🎬','大视频','建议迁移到 D 盘 / 移动硬盘，别占C盘',sum(vids),CATS.video.color,vids.length);
+  row('🖥️','系统/软件目录文件','在 Windows、Program Files 里，<span class="danger-note">不要在这里删</span>；卸载软件请去 设置 → 应用',sum(sys),CATS.program.color,sys.length);
+  $('suggList').innerHTML=html||'<div class="sugg"><div>✅ 没发现明显可清理项</div></div>';
+  $('suggCard').style.display='';
+}
+
+function renderTabs(){
+  const cnt=k=>k==='all'?files.length:((lastByCat||{})[k]||{n:0}).n;
+  const order=['all',...Object.keys(CATS)];
+  $('tabs').innerHTML=order.filter(k=>cnt(k)>0).map(k=>
+    `<div class="tab${k===curTab?' on':''}" data-k="${k}"><span class="cat-dot" style="background:${k==='all'?'#22263a':CATS[k].color}"></span>${k==='all'?'全部':CATS[k].name}<span class="cnt">${cnt(k)}</span></div>`).join('');
+  $('tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{curTab=t.dataset.k;renderTabs();renderList();});
+}
+
+function renderList(){
+  const q=$('search').value.trim().toLowerCase();
+  const list=files.filter(f=>(curTab==='all'||f.cat===curTab)&&(!q||f.name.toLowerCase().includes(q)||f.path.toLowerCase().includes(q)));
+  const max=list[0]?list[0].size:1;
+  const shown=list.slice(0,800);
+  $('tbody').innerHTML=shown.map(f=>{
+    const sys=isSysPath(f.path);
+    const risk=sys?'<span class="tag" style="background:#fdeaea;color:#c53030;">系统·勿删</span>'
+      :(CATS[f.cat].safe?'<span class="tag" style="background:#e7f7ef;color:#1e7a4c;">可清理</span>':'');
+    return `<tr data-p="${esc(f.path)}">
+      <td><input type="checkbox" class="chk" ${selected.has(f.path)?'checked':''} ${sys?'disabled title="系统目录，请勿删除"':''}></td>
+      <td title="${esc(f.path)}">${esc(f.name)}</td>
+      <td class="path">${esc(f.path)}</td>
+      <td><span class="tag" style="background:${CATS[f.cat].color}1a;color:${CATS[f.cat].color}">${CATS[f.cat].name}</span> ${risk}</td>
+      <td class="bar-cell"><div class="bar"><div style="width:${Math.max(2,f.size/max*100)}%;background:${CATS[f.cat].color}"></div></div></td>
+      <td class="size">${fmt(f.size)}</td></tr>`;
+  }).join('')||'<tr><td colspan="6"><div class="empty">没有匹配的文件</div></td></tr>';
+  $('moreHint').textContent=list.length>800?`已显示最大的前 800 个（共 ${list.length.toLocaleString()} 个，可用搜索缩小范围）`:'';
+  $('tbody').querySelectorAll('.chk').forEach(c=>c.onchange=()=>{
+    const p=c.closest('tr').dataset.p;
+    c.checked?selected.add(p):selected.delete(p);
+    updateDelBar();
+  });
+}
+function updateDelBar(){
+  const sel=files.filter(f=>selected.has(f.path));
+  $('selCnt').textContent=sel.length;
+  $('selSize').textContent=fmt(sel.reduce((s,f)=>s+f.size,0));
+  $('delBar').style.display=sel.length?'flex':'none';
+}
+$('search').oninput=()=>renderList();
+$('clearSelBtn').onclick=()=>{selected.clear();renderList();updateDelBar();};
+$('selAllBtn').onclick=()=>{
+  const q=$('search').value.trim().toLowerCase();
+  files.filter(f=>(curTab==='all'||f.cat===curTab)&&(!q||f.name.toLowerCase().includes(q))&&!isSysPath(f.path))
+    .slice(0,800).forEach(f=>selected.add(f.path));
+  renderList();updateDelBar();
+};
+$('delBtn').onclick=async()=>{
+  if(!selected.size)return;
+  if(!confirm(`确定要永久删除选中的 ${selected.size} 个文件吗？\n（不进回收站，删除后无法恢复）`))return;
+  let ok=0,fail=0; const deleted=new Set();
+  for(const path of selected){
+    const f=files.find(x=>x.path===path);
+    if(!f)continue;
+    try{
+      let h=curHandle;
+      const parts=f.path.split('\\');parts.pop();
+      for(const p of parts)h=await h.getDirectoryHandle(p);
+      await h.removeEntry(f.name);
+      ok++;deleted.add(path);
+    }catch(e){fail++;}
+  }
+  files=files.filter(f=>!deleted.has(f.path));
+  selected.clear();
+  render();
+  toast(`删除完成：成功 ${ok} 个${fail?`，失败 ${fail} 个（可能被软件占用）`:''}`);
+};
+if(!window.showDirectoryPicker){
+  $('pickBtn').disabled=true;
+  $('pickBtn').textContent='⚠️ 请用电脑 Edge/Chrome 打开';
+}
+</script>
+</body>
+</html>
