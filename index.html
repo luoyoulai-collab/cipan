@@ -12,7 +12,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
 header h1{font-size:22px;}
 .badge{font-size:12px;background:var(--p);color:#fff;border-radius:99px;padding:3px 10px;}
-.notice{background:#fff8e6;border:1px solid #f2dfb3;color:#8a6d2a;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.7;margin-bottom:16px;}
+.notice{background:#fff8e6;border:1px solid #f2dfb3;color:#8a6d2a;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.8;margin-bottom:16px;}
 .notice b{color:#6d5416;}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;}
 .card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -78,18 +78,20 @@ tr:hover td{background:#f8faff;}
 
 <div class="notice">
 ⚠️ <b>使用前必读：</b><br>
-① 请用 <b>电脑上的 Edge 或 Chrome 浏览器</b>打开本页（手机/微信打不开）。<br>
-② 建议第一次先扫 <b>「下载」文件夹</b> 试手，熟悉后再扫整个 C盘（扫C盘需几分钟，会弹权限确认，请点「上传文件」对应的允许）。<br>
-③ 删除前请确认文件不需要——删除不进回收站、无法恢复。Windows、Program Files 等<b>系统目录的内容不要删</b>（页面会自动标红禁选）。
+① 请用 <b>电脑上的 Edge 或 Chrome 浏览器</b>打开本页（手机打不开）。<br>
+② 弹出选择框后，<b>推荐选你的用户文件夹</b>：此电脑 → 本地磁盘 (C:) → Users → 选你用户名的那个文件夹（一个就够，下载/桌面/文档都在里面）。也可以分别添加「下载」「桌面」「视频」等文件夹，<b>可以添加多个合并扫描</b>。<br>
+③ 如果选「本地磁盘 (C:)」时提示 <b>「无法打开此文件夹，因为其中含有系统文件」</b>——这是浏览器的安全限制（任何网页都不许直接访问系统盘根目录），<b>不是坏了</b>：改选 Users 里的用户文件夹即可。<br>
+④ 删除不进回收站、无法恢复。系统目录（Windows、Program Files）会自动标红禁选。
 </div>
 
 <div class="card">
   <h2>🚀 开始</h2>
-  <div class="step"><div class="stepnum">1</div><div>点击下面按钮，在弹出窗口中选择要扫描的文件夹（如 <b>此电脑 → 下载</b>，或 <b>本地磁盘 C:</b>）</div></div>
-  <div class="step"><div class="stepnum">2</div><div>等待扫描完成，查看分类统计、清理建议与大文件排行</div></div>
-  <div class="step"><div class="stepnum">3</div><div>勾选不需要的文件（优先删「安装包」——软件装完就没用了），点击删除</div></div>
+  <div class="step"><div class="stepnum">1</div><div>点击按钮，选要扫描的文件夹（<b>推荐：Users → 你的用户名</b>；或「下载」先试手）</div></div>
+  <div class="step"><div class="stepnum">2</div><div>等扫描完成（文件多要几分钟，可随时停止），看分类统计和清理建议</div></div>
+  <div class="step"><div class="stepnum">3</div><div>想扫更多就点「再添加一个文件夹」；勾选不要的文件删除</div></div>
   <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
     <button class="btn big" id="pickBtn">📁 选择文件夹并扫描</button>
+    <button class="btn gray big" id="resetBtn" style="display:none;">🔄 清空重来</button>
     <button class="btn ghost big" id="stopBtn" style="display:none;">■ 停止</button>
   </div>
   <div class="progress-wrap" id="progWrap">
@@ -105,7 +107,7 @@ tr:hover td{background:#f8faff;}
 </div>
 
 <div class="card" id="suggCard" style="display:none;">
-  <h2>💡 清理建议</h2>
+  <h2>💡 清理建议 <span style="font-size:12px;color:var(--sub);font-weight:400;">（按占空间从大到小排）</span></h2>
   <div id="suggList"></div>
   <div class="hint">🟢 安装包、临时文件一般可放心删；🟡 图片/视频/文档是你的个人文件，删前确认或迁移到 D 盘；🔴 系统目录内容不要动。</div>
 </div>
@@ -136,9 +138,10 @@ tr:hover td{background:#f8faff;}
   <div class="hint" style="margin-top:0;font-size:13px;">
     <b>安装包</b>（.exe / .msi / .apk）→ 软件装完就没用了，<span class="safe">放心删</span>；下次要装去官网重新下载<br>
     <b>程序/软件本体</b> → 已装好的软件（多在 Program Files），删了软件就没了，<span class="danger-note">别在这里删</span>；卸载软件请去「设置 → 应用」<br>
+    <b>微信/QQ 数据</b> → 聊天图片视频最占C盘：电脑微信「设置 → 文件管理」改存到 D 盘并清理缓存<br>
     <b>图片 / 视频 / 文档</b> → 你的个人文件，删前想想要不要备份，或迁移到 D 盘<br>
     <b>压缩包</b>（.zip / .rar / .7z）→ 解压过的一般可以删<br>
-    <b>临时文件</b>（Temp / Cache 缓存）→ 可以删，软件会自动重新生成<br>
+    <b>AppData 软件数据</b> → 各软件的缓存，优先用软件自己的设置清理，不要整文件夹删<br>
     <b>系统文件</b>（Windows 文件夹里）→ <span class="danger-note">绝对不要动</span>
   </div>
 </div>
@@ -146,7 +149,7 @@ tr:hover td{background:#f8faff;}
 <div class="toast" id="toast"></div>
 
 <script>
-window.__VER='v1.0';
+window.__VER='v1.1';
 document.getElementById('verBadge').textContent=window.__VER;
 
 const CATS = {
@@ -161,85 +164,108 @@ const CATS = {
   db:{name:'数据文件',color:'#a0a8b8',exts:['db','sqlite','mdb','dat','bak','old','tmp'],safe:0},
   other:{name:'其他',color:'#c3c9d9',exts:[],safe:0}
 };
-const SYS_DIRS = ['windows','program files','program files (x86)','programdata','$recycle.bin','system volume information','perflogs','recovery','drivers','intel','amd','nvidia'];
-const TEMP_HINT = /(^|\\)(temp|cache|缓存|tmp)(\\|$)/i;
+const SYS_DIRS=['windows','program files','program files (x86)','programdata','$recycle.bin','system volume information','perflogs','recovery','drivers','intel','amd','nvidia'];
+const TEMP_HINT=/(^|\\)(temp|cache|缓存|tmp)(\\|$)/i;
+const APPDATA_RE=/(^|\\)appdata(\\|$)/i;
+const WX_RE=/(^|\\)[^\\]*(wechat|weixin|tencent|qq)[^\\]*(\\|$)/i;
 
-let files=[], aborted=false, curTab='all', curHandle=null, lastByCat=null;
+let files=[], roots=[], seenKeys=new Set();
+let aborted=false, curTab='all', lastByCat=null;
 const selected=new Set();
 
 const $=id=>document.getElementById(id);
 const fmt=n=>{if(n>=1073741824)return(n/1073741824).toFixed(2)+' GB';if(n>=1048576)return(n/1048576).toFixed(1)+' MB';if(n>=1024)return(n/1024).toFixed(0)+' KB';return n+' B';};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
-
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3200);}
 function catOf(name){
   const ext=(name.includes('.')?name.split('.').pop():'').toLowerCase();
   for(const k in CATS){if(CATS[k].exts.includes(ext))return k;}
   return 'other';
 }
 const isSysPath=p=>SYS_DIRS.includes((p.split('\\')[0]||'').toLowerCase());
+function tagOf(f){
+  if(isSysPath(f.path))return{t:'系统·勿删',bg:'#fdeaea',fg:'#c53030',dis:true,tip:'系统目录，请勿删除'};
+  if(APPDATA_RE.test(f.path))return{t:'软件数据',bg:'#fff1d6',fg:'#b25e09',dis:false,tip:'软件缓存数据，谨慎处理'};
+  if(CATS[f.cat].safe)return{t:'可清理',bg:'#e7f7ef',fg:'#1e7a4c',dis:false,tip:''};
+  return null;
+}
 
-$('pickBtn').onclick=async()=>{
+async function pickFolder(){
   try{
-    const h=await window.showDirectoryPicker({mode:'readwrite'});
-    curHandle=h; aborted=false; files=[]; selected.clear();
-    $('pickBtn').disabled=true; $('stopBtn').style.display='';
-    $('progWrap').style.display='block';
-    $('stats').style.display='none';$('suggCard').style.display='none';$('filesCard').style.display='none';
-    const t0=Date.now();
-    await scan(h,'');
-    if(aborted&&files.length)toast('已停止扫描（已扫到的部分照常显示）');
-    else if(aborted)return;
-    render();
-    toast('扫描完成：'+files.length.toLocaleString()+' 个文件，用时 '+((Date.now()-t0)/1000).toFixed(1)+' 秒');
+    const h=await window.showDirectoryPicker({mode:'readwrite',startIn:'downloads'});
+    aborted=false;
+    if(!files.length)selected.clear();
+    roots.push({name:h.name,handle:h});
+    const idx=roots.length-1;
+    $('pickBtn').disabled=true;$('stopBtn').style.display='';$('progWrap').style.display='block';
+    await scan(h,'',idx);
+    if(aborted&&!files.length){toast('已停止，没有扫到文件');}
+    else if(aborted){toast('已停止扫描（已扫到的部分照常显示）');render();}
+    else{
+      render();
+      toast('扫描完成：目前共 '+files.length.toLocaleString()+' 个文件');
+    }
   }catch(e){
-    if(e.name==='AbortError')toast('已取消选择');
-    else if(e.name==='SecurityError')toast('权限不足：请换 Edge/Chrome，或选择有权限的文件夹');
+    if(e.name==='AbortError'){toast('已取消选择');}
+    else if(e.name==='SecurityError'){toast('权限不足：请换 Edge/Chrome 重试');}
     else toast('出错了：'+e.message);
   }finally{
-    $('pickBtn').disabled=false; $('stopBtn').style.display='none';
+    $('pickBtn').disabled=false;$('stopBtn').style.display='none';
   }
-};
+}
+$('pickBtn').onclick=pickFolder;
 $('stopBtn').onclick=()=>{aborted=true;};
+$('resetBtn').onclick=()=>{
+  files=[];roots=[];seenKeys=new Set();selected.clear();lastByCat=null;curTab='all';
+  $('stats').style.display='none';$('suggCard').style.display='none';$('filesCard').style.display='none';
+  $('resetBtn').style.display='none';$('pickBtn').textContent='📁 选择文件夹并扫描';
+  toast('已清空，重新选择文件夹吧');
+};
 
-async function scan(dir,prefix){
+async function scan(dir,prefix,rootIdx){
   if(aborted)return;
   let entries;
   try{entries=dir.entries();}catch(e){return;}
   const tasks=[];
-  for await(const [name,handle] of entries){
-    if(aborted)return;
-    const path=prefix?prefix+'\\'+name:name;
-    if(handle.kind==='file'){
-      tasks.push((async()=>{
-        let size=0;
-        try{size=(await handle.getFile()).size;}catch(e){}
-        files.push({name,path,size,cat:catOf(name)});
-      })());
-      if(tasks.length>=300){updateProg(path);await Promise.all(tasks);tasks.length=0;}
-    }else{
-      updateProg(path+'\\…');
-      await scan(handle,path);
+  try{
+    for await(const [name,handle] of entries){
+      if(aborted)return;
+      if(handle.kind==='file'){
+        const rel=prefix?prefix+'\\'+name:name;
+        const key=roots[rootIdx].name+'|'+rel;
+        if(!seenKeys.has(key)){
+          seenKeys.add(key);
+          tasks.push((async()=>{
+            let size=0;
+            try{size=(await handle.getFile()).size;}catch(e){}
+            files.push({name,rel,path:roots[rootIdx].name+'\\'+rel,size,cat:catOf(name),root:rootIdx});
+          })());
+        }
+        if(tasks.length>=300){updateProg(rel);await Promise.all(tasks);tasks.length=0;}
+      }else{
+        updateProg(roots[rootIdx].name+'\\'+(prefix?prefix+'\\':'')+name+'\\…');
+        await scan(handle,prefix?prefix+'\\'+name:name,rootIdx);
+      }
     }
-  }
-  if(tasks.length)await Promise.all(tasks);
+  }catch(e){}
+  if(tasks.length){updateProg(roots[rootIdx].name);await Promise.all(tasks);}
 }
 let lastProg=0;
 function updateProg(txt){
   const now=Date.now();
   if(now-lastProg<300)return; lastProg=now;
-  $('ptext').textContent='已扫描 '+files.length.toLocaleString()+' 个文件… 当前：'+txt;
+  $('ptext').textContent='已扫描 '+files.length.toLocaleString()+' 个文件（'+roots.length+' 个文件夹）… 当前：'+txt;
   $('pbar').style.width=Math.min(96,(files.length%94)+3)+'%';
 }
 
 function render(){
-  if(!files.length){toast('没有扫到文件（可能没有权限或已停止）');return;}
+  if(!files.length)return;
   $('pbar').style.width='100%';$('ptext').textContent='扫描完成！共 '+files.length.toLocaleString()+' 个文件';
   setTimeout(()=>{$('progWrap').style.display='none';},1000);
   files.sort((a,b)=>b.size-a.size);
   const total=files.reduce((s,f)=>s+f.size,0);
-  $('totalInfo').textContent='共 '+files.length.toLocaleString()+' 个文件，总计 '+fmt(total);
+  $('totalInfo').textContent='共 '+files.length.toLocaleString()+' 个文件 · 来自 '+roots.length+' 个文件夹 · 总计 '+fmt(total);
   const byCat={};
   files.forEach(f=>{(byCat[f.cat]=byCat[f.cat]||{n:0,s:0});byCat[f.cat].n++;byCat[f.cat].s+=f.size;});
   lastByCat=byCat;
@@ -252,23 +278,30 @@ function render(){
   renderTabs();
   renderList();
   $('filesCard').style.display='';
+  $('resetBtn').style.display='';
+  $('pickBtn').textContent='➕ 再添加一个文件夹';
 }
 
 function renderSugg(){
   const sum=a=>a.reduce((s,f)=>s+f.size,0);
+  const R=[];
+  const push=(icon,t,d,v,show)=>{if(show)R.push({icon,t,d,v});};
   const inst=files.filter(f=>f.cat==='installer');
-  const temp=files.filter(f=>TEMP_HINT.test(f.path)&&f.size>1048576);
-  const archives=files.filter(f=>f.cat==='archive');
+  const wx=files.filter(f=>WX_RE.test(f.path));
   const vids=files.filter(f=>f.cat==='video');
+  const archives=files.filter(f=>f.cat==='archive');
+  const temp=files.filter(f=>TEMP_HINT.test(f.path)&&f.size>1048576);
+  const appdata=files.filter(f=>APPDATA_RE.test(f.path));
   const sys=files.filter(f=>isSysPath(f.path));
-  let html='';
-  const row=(icon,title,desc,size,color,show)=>{if(!show)return;
-    html+=`<div class="sugg"><div><b>${icon} ${title}</b> — ${desc}</div><div class="sz" style="color:${color}">${fmt(size)}</div></div>`;};
-  row('📦','安装包','软件装完就没用了，删了不影响已装的软件',sum(inst),CATS.installer.color,inst.length);
-  row('🧹','临时/缓存文件','软件垃圾，可安全清理',sum(temp),CATS.other.color,temp.length);
-  row('🗜️','压缩包','解压过的一般可以删',sum(archives),CATS.archive.color,archives.length);
-  row('🎬','大视频','建议迁移到 D 盘 / 移动硬盘，别占C盘',sum(vids),CATS.video.color,vids.length);
-  row('🖥️','系统/软件目录文件','在 Windows、Program Files 里，<span class="danger-note">不要在这里删</span>；卸载软件请去 设置 → 应用',sum(sys),CATS.program.color,sys.length);
+  push('📦','安装包','软件装完就没用了，删了不影响已装的软件',sum(inst),inst.length);
+  push('💬','微信/QQ 数据','聊天图片视频最占C盘：电脑微信 → 设置 → 文件管理 → 更改存储到 D 盘 + 清理缓存',sum(wx),wx.length);
+  push('🎬','大视频','建议迁移到 D 盘 / 移动硬盘，别占C盘',sum(vids),vids.length);
+  push('🗜️','压缩包','解压过的一般可以删',sum(archives),archives.length);
+  push('🧹','临时/缓存文件','软件垃圾，可安全清理',sum(temp),temp.length);
+  push('⚙️','AppData 软件数据','各软件的缓存：优先用软件自己的设置清理（如微信存储清理），别整文件夹删',sum(appdata),appdata.length);
+  R.sort((a,b)=>b.v-a.v);
+  let html=R.map(r=>`<div class="sugg"><div><b>${r.icon} ${r.t}</b> — ${r.d}</div><div class="sz">${fmt(r.v)}</div></div>`).join('');
+  if(sys.length)html+=`<div class="sugg"><div><b>🖥️ 系统/软件目录文件</b> — Windows、Program Files 里的内容 <span class="danger-note">不要在这里删</span>；卸载软件请去 设置 → 应用</div><div class="sz">${fmt(sum(sys))}</div></div>`;
   $('suggList').innerHTML=html||'<div class="sugg"><div>✅ 没发现明显可清理项</div></div>';
   $('suggCard').style.display='';
 }
@@ -287,14 +320,12 @@ function renderList(){
   const max=list[0]?list[0].size:1;
   const shown=list.slice(0,800);
   $('tbody').innerHTML=shown.map(f=>{
-    const sys=isSysPath(f.path);
-    const risk=sys?'<span class="tag" style="background:#fdeaea;color:#c53030;">系统·勿删</span>'
-      :(CATS[f.cat].safe?'<span class="tag" style="background:#e7f7ef;color:#1e7a4c;">可清理</span>':'');
+    const tg=tagOf(f);
     return `<tr data-p="${esc(f.path)}">
-      <td><input type="checkbox" class="chk" ${selected.has(f.path)?'checked':''} ${sys?'disabled title="系统目录，请勿删除"':''}></td>
+      <td><input type="checkbox" class="chk" ${selected.has(f.path)?'checked':''} ${tg&&tg.dis?`disabled title="${tg.tip}"`:''}></td>
       <td title="${esc(f.path)}">${esc(f.name)}</td>
       <td class="path">${esc(f.path)}</td>
-      <td><span class="tag" style="background:${CATS[f.cat].color}1a;color:${CATS[f.cat].color}">${CATS[f.cat].name}</span> ${risk}</td>
+      <td><span class="tag" style="background:${CATS[f.cat].color}1a;color:${CATS[f.cat].color}">${CATS[f.cat].name}</span>${tg?` <span class="tag" style="background:${tg.bg};color:${tg.fg}"${tg.tip?` title="${tg.tip}"`:''}>${tg.t}</span>`:''}</td>
       <td class="bar-cell"><div class="bar"><div style="width:${Math.max(2,f.size/max*100)}%;background:${CATS[f.cat].color}"></div></div></td>
       <td class="size">${fmt(f.size)}</td></tr>`;
   }).join('')||'<tr><td colspan="6"><div class="empty">没有匹配的文件</div></td></tr>';
@@ -322,21 +353,22 @@ $('selAllBtn').onclick=()=>{
 $('delBtn').onclick=async()=>{
   if(!selected.size)return;
   if(!confirm(`确定要永久删除选中的 ${selected.size} 个文件吗？\n（不进回收站，删除后无法恢复）`))return;
-  let ok=0,fail=0; const deleted=new Set();
+  let ok=0,fail=0;const deleted=new Set();
   for(const path of selected){
     const f=files.find(x=>x.path===path);
     if(!f)continue;
     try{
-      let h=curHandle;
-      const parts=f.path.split('\\');parts.pop();
+      let h=roots[f.root].handle;
+      const parts=f.rel.split('\\');
+      const fname=parts.pop();
       for(const p of parts)h=await h.getDirectoryHandle(p);
-      await h.removeEntry(f.name);
+      await h.removeEntry(fname);
       ok++;deleted.add(path);
     }catch(e){fail++;}
   }
   files=files.filter(f=>!deleted.has(f.path));
   selected.clear();
-  render();
+  render();updateDelBar();
   toast(`删除完成：成功 ${ok} 个${fail?`，失败 ${fail} 个（可能被软件占用）`:''}`);
 };
 if(!window.showDirectoryPicker){
